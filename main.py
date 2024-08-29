@@ -117,7 +117,7 @@ def OpenAIServer():
     return st.text_input("OpenAI Server URL", "https://api.lmtchina.com/v1")
 
 
-openai.api_key = "sk-ChVriin31WTWMlgvD293A8C1Ec714d7e81141fB253E8FdF5"
+openai.api_key = "sk-"
 openai.api_base = "https://api.lmtchina.com/v1"
 
 
@@ -139,18 +139,47 @@ def ChatTTSServer():
     return TTSServer, audio_seed_input, Audio_temp, Top_P, Top_K, Refine_text
 
 
-# 摄像头与DeepFace分析
+
 def camera_main():
     st.header("Camera Feed")
 
-    # 将摄像头画面和检测结果放在左侧
+    # Add custom CSS to make the left column sticky
+    st.markdown(
+        """
+        <style>
+        .sticky-col {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            height: 100vh; /* Full height */
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+        .scrollable-col {
+            overflow-y: auto; /* Enable vertical scrolling */
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    # Create two columns: left for the camera feed and analysis, right for chat
     col1, col2 = st.columns([1, 3])
 
     with col1:
+        # Apply sticky class
+        st.markdown('<div class="sticky-col">', unsafe_allow_html=True)
+
+        # Show camera feed
         video_placeholder = st.empty()
+        # Show analysis results
         analysis_placeholder = st.empty()
 
+        st.markdown('</div>', unsafe_allow_html=True)
+
     with col2:
+        # Create a scrollable container for the chat section
+        st.markdown('<div class="scrollable-col">', unsafe_allow_html=True)
+
         st.subheader("Chat")
 
         server = OpenAIServer()
@@ -188,14 +217,15 @@ def camera_main():
                     "Top_K": Top_K,
                     "Refine_text": Refine_text,
                 }
-                print_chat_message(user_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
-                chat_history.append(user_message)
 
-                # 将DeepFace情绪分析结果加入对话历史
+                # Add DeepFace emotion analysis result to user message
                 analysis_result = st.session_state.get('last_deepface_analysis', None)
                 if analysis_result:
                     emotion = analysis_result['dominant_emotion']
                     user_message["content"] += f"。检测到的情绪是{emotion}。"
+
+                print_chat_message(user_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
+                chat_history.append(user_message)
 
                 response = openai.ChatCompletion.create(
                     model=model,
@@ -222,12 +252,14 @@ def camera_main():
 
                 st.session_state.chat_history[model] = chat_history
 
-    # 初始化摄像头
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    # Initialize camera
     cap = cv2.VideoCapture(0)
 
-    # 初始化DeepFace分析状态
+    # Initialize DeepFace analysis status
     if "last_analysis" not in st.session_state:
-        st.session_state.last_analysis = time.time() - 100  # 确保第一次分析立即执行
+        st.session_state.last_analysis = time.time() - 100  # Ensure first analysis runs immediately
 
     while cap.isOpened():
         ret, frame = cap.read()
@@ -236,16 +268,15 @@ def camera_main():
             st.error("Failed to capture image from camera.")
             break
 
-        # 将帧从BGR转换为RGB
+        # Convert frame from BGR to RGB
         frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         image = Image.fromarray(frame_rgb)
 
-        #
-        # 显示摄像头画面
+        # Show camera feed
         video_placeholder.image(image, channels="RGB", use_column_width=True)
 
-        # 每隔一定时间进行一次DeepFace分析
-        if time.time() - st.session_state.last_analysis > 10:  # 每10秒分析一次
+        # Perform DeepFace analysis every 10 seconds
+        if time.time() - st.session_state.last_analysis > 10:  # Analyze every 10 seconds
             st.session_state.last_analysis = time.time()
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
                 temp_file_path = temp_file.name
@@ -254,11 +285,11 @@ def camera_main():
                 try:
                     analysis_result = DeepFace.analyze(temp_file_path, actions=['age', 'gender', 'race', 'emotion'], enforce_detection=False)
                     if isinstance(analysis_result, list) and len(analysis_result) > 0:
-                        # 取第一个人脸的分析结果
+                        # Get the analysis result for the first face
                         analysis_result = analysis_result[0]
                         st.session_state.last_deepface_analysis = analysis_result
 
-                        # 显示检测结果
+                        # Show analysis results
                         age = analysis_result.get('age', 'N/A')
                         gender = analysis_result.get('dominant_gender', 'N/A')
                         race = analysis_result.get('dominant_race', 'N/A')
@@ -276,14 +307,9 @@ def camera_main():
                 except Exception as e:
                     analysis_placeholder.text(f"分析出错: {e}")
 
-        # # 添加退出摄像头的按钮
-        # if st.button("停止摄像头"):
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     break
-
     cap.release()
     cv2.destroyAllWindows()
+
 
 
 if __name__ == "__main__":

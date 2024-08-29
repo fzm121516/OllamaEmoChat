@@ -113,7 +113,7 @@ def OpenAIServer():
     return st.text_input("OpenAI Server URL", "https://api.lmtchina.com/v1")
 
 
-openai.api_key = "sk-ChVriin31WTWMlgvD293A8C1Ec714d7e81141fB253E8FdF5"
+openai.api_key = "sk-"
 openai.api_base = "https://api.lmtchina.com/v1"
 
 # ChatTTS服务器设置
