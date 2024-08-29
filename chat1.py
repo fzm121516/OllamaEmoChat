@@ -1,16 +1,12 @@
-import time
-import cv2
-import numpy as np
-from PIL import Image
-import tempfile
-import os
-import streamlit as st
-from deepface import DeepFace
+import random
 import openai
 import requests
-import random
 import streamlit as st
+import random
 from streamlit_mic_recorder import speech_to_text
+import ollama as ol
+import requests
+import streamlit as st
 
 
 # 录音功能
@@ -120,7 +116,6 @@ def OpenAIServer():
 openai.api_key = "sk-ChVriin31WTWMlgvD293A8C1Ec714d7e81141fB253E8FdF5"
 openai.api_base = "https://api.lmtchina.com/v1"
 
-
 # ChatTTS服务器设置
 def ChatTTSServer():
     ChatTTSServer = st.text_input("ChatTTS Server URL", "http://127.0.0.1:9966/tts")
@@ -139,20 +134,11 @@ def ChatTTSServer():
     return TTSServer, audio_seed_input, Audio_temp, Top_P, Top_K, Refine_text
 
 
-# 摄像头与DeepFace分析
-def camera_main():
-    st.header("Camera Feed")
+# 主函数
+def main():
+    st.header(':rainbow[:speech_balloon: OpenAI V-Chat]')
 
-    # 将摄像头画面和检测结果放在左侧
-    col1, col2 = st.columns([1, 3])
-
-    with col1:
-        video_placeholder = st.empty()
-        analysis_placeholder = st.empty()
-
-    with col2:
-        st.subheader("Chat")
-
+    with st.container():
         server = OpenAIServer()
         model = OpenAIModel()
         language = language_selector()
@@ -190,13 +176,6 @@ def camera_main():
                 }
                 print_chat_message(user_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
                 chat_history.append(user_message)
-
-                # 将DeepFace情绪分析结果加入对话历史
-                analysis_result = st.session_state.get('last_deepface_analysis', None)
-                if analysis_result:
-                    emotion = analysis_result['dominant_emotion']
-                    user_message["content"] += f"。检测到的情绪是{emotion}。"
-
                 response = openai.ChatCompletion.create(
                     model=model,
                     messages=chat_history,
@@ -222,69 +201,6 @@ def camera_main():
 
                 st.session_state.chat_history[model] = chat_history
 
-    # 初始化摄像头
-    cap = cv2.VideoCapture(0)
-
-    # 初始化DeepFace分析状态
-    if "last_analysis" not in st.session_state:
-        st.session_state.last_analysis = time.time() - 100  # 确保第一次分析立即执行
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-
-        if not ret:
-            st.error("Failed to capture image from camera.")
-            break
-
-        # 将帧从BGR转换为RGB
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        image = Image.fromarray(frame_rgb)
-
-        #
-        # 显示摄像头画面
-        video_placeholder.image(image, channels="RGB", use_column_width=True)
-
-        # 每隔一定时间进行一次DeepFace分析
-        if time.time() - st.session_state.last_analysis > 10:  # 每10秒分析一次
-            st.session_state.last_analysis = time.time()
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
-                temp_file_path = temp_file.name
-                image.save(temp_file_path)
-
-                try:
-                    analysis_result = DeepFace.analyze(temp_file_path, actions=['age', 'gender', 'race', 'emotion'], enforce_detection=False)
-                    if isinstance(analysis_result, list) and len(analysis_result) > 0:
-                        # 取第一个人脸的分析结果
-                        analysis_result = analysis_result[0]
-                        st.session_state.last_deepface_analysis = analysis_result
-
-                        # 显示检测结果
-                        age = analysis_result.get('age', 'N/A')
-                        gender = analysis_result.get('dominant_gender', 'N/A')
-                        race = analysis_result.get('dominant_race', 'N/A')
-                        emotion = analysis_result.get('dominant_emotion', 'N/A')
-
-                        analysis_str = (
-                            f"年龄: {age}\n"
-                            f"性别: {gender}\n"
-                            f"种族: {race}\n"
-                            f"情绪: {emotion}\n"
-                        )
-                        analysis_placeholder.text(analysis_str)
-                    else:
-                        analysis_placeholder.text("没有检测到人脸。")
-                except Exception as e:
-                    analysis_placeholder.text(f"分析出错: {e}")
-
-        # # 添加退出摄像头的按钮
-        # if st.button("停止摄像头"):
-        #     cap.release()
-        #     cv2.destroyAllWindows()
-        #     break
-
-    cap.release()
-    cv2.destroyAllWindows()
-
 
 if __name__ == "__main__":
-    camera_main()
+    main()
