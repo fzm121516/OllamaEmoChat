@@ -4,6 +4,7 @@ import ollama as ol
 import requests
 import streamlit as st
 
+
 # 打印聊天消息
 def print_chat_message(message, ChatTTSServer, audio_seed_input, Audio_temp, Top_P, Top_K, Refine_text, is_history):
     text = message["content"]
@@ -44,18 +45,16 @@ def print_chat_message(message, ChatTTSServer, audio_seed_input, Audio_temp, Top
                 except requests.exceptions.RequestException as e:
                     st.error(f"请求失败: {e}")
 
+
 # 打印文本内容
 def print_txt(text):
     st.write(text)
 
+
 st.set_page_config(layout="wide")
 
-# 摄像头功能
-def camera_sidebar():
-    st.sidebar.header("Camera Feed")
-    camera_image = st.sidebar.camera_input("Capture Image")
-    if camera_image:
-        st.sidebar.image(camera_image, caption="Captured Image", use_column_width=True)
+
+
 
 # 录音功能
 def record_voice(language="zh"):
@@ -82,29 +81,35 @@ def record_voice(language="zh"):
 
     return result if result else None
 
+
 # 生成随机种子
 def generate_seed():
     new_seed = random.randint(1, 100000000)
     st.session_state.Audio_Seed = new_seed
+
 
 # 生成文本种子
 def generate_seed2():
     new_seed = random.randint(1, 100000000)
     st.session_state.Text_Seed = new_seed
 
+
 # 用户语言选择
 def language_selector():
     lang_options = ["ar", "de", "en", "es", "fr", "it", "ja", "nl", "pl", "pt", "ru", "zh"]
     return st.selectbox("语言 Language", ["zh"] + lang_options)
+
 
 # Ollama模型选择
 def OllamaModel():
     ollama_models = [m['name'] for m in ol.list()['models']]
     return st.selectbox("模型 Ollama Models", ollama_models)
 
+
 # Ollama服务器设置
 def OllamaServer():
     return st.text_input("Ollama Server URL", "http://127.0.0.1:11434")
+
 
 # ChatTTS服务器设置
 def ChatTTSServer():
@@ -126,9 +131,9 @@ def ChatTTSServer():
         TTSServer = ChatTTSServer
     return TTSServer, audio_seed_input, Audio_temp, Top_P, Top_K, Refine_text
 
+
 # 主函数
 def main():
-    camera_sidebar()
 
     st.header(':rainbow[:speech_balloon: Ollama V-Chat]')
 
@@ -189,6 +194,7 @@ def main():
                     chat_history = chat_history[-20:]
 
                 st.session_state.chat_history[model] = chat_history
+
 
 if __name__ == "__main__":
     main()
