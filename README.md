@@ -12,7 +12,7 @@
 
 ##  安装部署 
 
-1. 下载并安装 [Ollama](http://ollama.com) ，并下载你想要的模型
+1. 下载并安装 [Ollama](http://ollama.com) ，并下载llama2-chinese:7b
 
 2. 下载并部署 [ChatTTS-ui](https://github.com/jianchang512/ChatTTS-ui/) 
 
@@ -36,3 +36,7 @@
        Streamlit run main_ollama.py
 
   
+
+![demo1](pic/demo1.jpg)
+
+![demo2](pic/demo2.jpg)
