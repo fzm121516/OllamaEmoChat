@@ -215,7 +215,6 @@ def camera_main():
                     "Refine_text": Refine_text,
                 }
 
-
                 # Add DeepFace emotion analysis result to user message
                 analysis_result = st.session_state.get('last_deepface_analysis', None)
                 if analysis_result:
