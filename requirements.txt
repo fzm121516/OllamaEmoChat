@@ -1,0 +1,9 @@
+deepface==0.0.93
+numpy==1.23.5
+ollama==0.3.2
+openai==0.28.0
+opencv_python==4.10.0.84
+Pillow==10.4.0
+Requests==2.32.3
+streamlit==1.38.0
+streamlit_mic_recorder==0.0.8
