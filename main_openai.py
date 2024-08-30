@@ -114,11 +114,11 @@ def OpenAIModel():
 
 # OpenAI服务器设置
 def OpenAIServer():
-    return st.text_input("OpenAI Server URL", "https://api.lmtchina.com/v1")
+    return st.text_input("OpenAI Server URL", "")
 
 
-openai.api_key = "sk-"
-openai.api_base = "https://api.lmtchina.com/v1"
+openai.api_key = ""
+openai.api_base = ""
 
 
 # ChatTTS服务器设置
