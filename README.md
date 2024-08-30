@@ -35,4 +35,4 @@
       ```bash
        Streamlit run main_ollama.py
 
-   
+  
