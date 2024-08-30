@@ -219,7 +219,7 @@ def camera_main():
                 analysis_result = st.session_state.get('last_deepface_analysis', None)
                 if analysis_result:
                     emotion = analysis_result['dominant_emotion']
-                    user_message["content"] += f"。检测到的情绪是{emotion}。"
+                    user_message["content"] += f"。我当前的情绪是{emotion}，请给出对应我情绪的回答。"
 
                 print_chat_message(user_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
                 chat_history.append(user_message)
