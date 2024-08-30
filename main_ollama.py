@@ -268,7 +268,7 @@ def camera_main():
         video_placeholder.image(image, channels="RGB", use_column_width=True)
 
         # Perform DeepFace analysis every 10 seconds
-        if time.time() - st.session_state.last_analysis > 10:  # Analyze every 10 seconds
+        if time.time() - st.session_state.last_analysis > 2:  # Analyze every 10 seconds
             st.session_state.last_analysis = time.time()
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as temp_file:
                 temp_file_path = temp_file.name
