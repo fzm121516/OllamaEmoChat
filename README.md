@@ -1,4 +1,4 @@
- ## 基于开源模型的实时情感交流
+ ## HIT24秋专业实践：基于开源模型的实时情感交流
 
 这是一个基于 Streamlit 框架的 Web 应用，集成了实时摄像头人脸分析，语音聊天和数据存储功能。
 
@@ -7,8 +7,8 @@
 - **人脸分析**：使用 [`serengil/deepface`](https://github.com/serengil/deepface)实时对摄像头中的图像进行人脸分析，包括年龄、性别、种族和情绪检测等。
 - **语音输入**：用户可以通过录音进行语音输入，使用 [`mozilla/DeepSpeech`](https://github.com/mozilla/DeepSpeech)将语音转换为文本。
 
-- **聊天功能**：集成 Ollama API, 将语音输入的文本以及检测到的情绪输入给大语言模型，并生成聊天回复。
-- **文本转语音**：使用 ChatTTS 根据大语言模型回复生成语音，并自动播放。
+- **聊天功能**：使用 Ollama API, 将语音输入的文本以及检测到的情绪输入给大语言模型，并生成聊天回复。
+- **文本转语音**：使用 ChatTTS根据大语言模型回复生成语音，并自动播放。
 - **数据存储**：使用 [`mysql/mysql-connector-python`](https://github.com/mysql/mysql-connector-python)链接 MySQL 数据库，保存检测到的情绪和对话记录。
 
 ##  安装部署 
@@ -52,7 +52,7 @@
 
       ```bash
        Streamlit run main_ollama.py
-## demo
+## 演示截图
 ![demo1](pic/demo1.png)
 
 ![demo2](pic/demo2.png)
