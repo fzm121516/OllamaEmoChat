@@ -12,6 +12,53 @@ import random
 import streamlit as st
 from streamlit_mic_recorder import speech_to_text
 import ollama as ol
+import mysql.connector
+import mysql.connector
+from datetime import datetime
+
+
+def create_table_if_not_exists():
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    create_table_sql = """
+    CREATE TABLE IF NOT EXISTS chat_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        emotion VARCHAR(50),
+        question TEXT,
+        answer TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    );
+    """
+    cursor.execute(create_table_sql)
+    connection.commit()
+    cursor.close()
+    connection.close()
+
+
+def get_db_connection():
+    connection = mysql.connector.connect(
+        host="localhost",  # MySQL 服务器地址
+        port=3306,  # MySQL 端口号
+        user="root",  # MySQL 用户名
+        password="123456",  # MySQL 密码
+        database="ollamaemochat"  # 数据库名称
+    )
+    return connection
+
+
+def save_to_database(emotion, question, answer, timestamp=None):
+    connection = get_db_connection()
+    cursor = connection.cursor()
+    if timestamp is None:
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    sql = "INSERT INTO chat_history (emotion, question, answer, created_at) VALUES (%s, %s, %s, %s)"
+    values = (emotion, question, answer, timestamp)
+    cursor.execute(sql, values)
+    connection.commit()
+    cursor.close()
+    connection.close()
+
 
 # 录音功能
 def record_voice(language="zh"):
@@ -44,7 +91,7 @@ def print_chat_message(message, ChatTTSServer, audio_seed_input, Audio_temp, Top
     text = message["content"]
 
     if message["role"] == "user":
-        with st.chat_message("user", avatar="😊"):
+        with st.chat_message("user", avatar="👤"):
             print_txt(text)
     if message["role"] == "assistant":
         with st.chat_message("assistant", avatar="🤖"):
@@ -117,7 +164,6 @@ def OpenAIServer():
     return st.text_input("OpenAI Server URL", "http://127.0.0.1:11434")
 
 
-
 # ChatTTS服务器设置
 def ChatTTSServer():
     ChatTTSServer = st.text_input("ChatTTS Server URL", "http://127.0.0.1:9966/tts")
@@ -134,7 +180,6 @@ def ChatTTSServer():
         Top_K = st.slider('top_K', min_value=1, max_value=20, value=20, step=1, key="top_K")
         TTSServer = ChatTTSServer
     return TTSServer, audio_seed_input, Audio_temp, Top_P, Top_K, Refine_text
-
 
 
 def camera_main():
@@ -199,7 +244,7 @@ def camera_main():
             chat_history = st.session_state.chat_history[model]
             if len(chat_history) == 0:
                 chat_history.append({"role": "system",
-                                     "content": "我会用中文简短回答。"})
+                                     "content": "用中文回答，尽量在30字以内。"})
 
             for message in chat_history:
                 print_chat_message(message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=True)
@@ -219,10 +264,16 @@ def camera_main():
                 analysis_result = st.session_state.get('last_deepface_analysis', None)
                 if analysis_result:
                     emotion = analysis_result['dominant_emotion']
-                    user_message["content"] += f"。我当前的情绪是{emotion}，请给出对应我情绪的回答。"
+                    user_message["content"] = f"我当前的情绪是{emotion}，请给出对应我情绪的回答。" + user_message["content"]
+                else:
+                    emotion = "未检测到情绪"
+
+                # 获取当前时间戳
+                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
                 print_chat_message(user_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
                 chat_history.append(user_message)
+
 
                 response = ol.chat(model=model, messages=chat_history)
                 answer = response['message']['content']
@@ -238,6 +289,9 @@ def camera_main():
                 }
                 print_chat_message(ai_message, TTSServer, st.session_state.Audio_Seed, Audio_temp, Top_P, Top_K, Refine_text, is_history=False)
                 chat_history.append(ai_message)
+
+                # 保存AI回答到数据库，使用与用户问题相同的时间戳
+                save_to_database(emotion, user_message["content"], ai_message["content"], timestamp)
 
                 if len(chat_history) > 20:
                     chat_history = chat_history[-20:]
@@ -305,4 +359,5 @@ def camera_main():
 
 
 if __name__ == "__main__":
+    create_table_if_not_exists()
     camera_main()
