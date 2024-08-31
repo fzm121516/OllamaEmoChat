@@ -1,6 +1,6 @@
  ## HIT24秋专业实践：基于开源模型的实时情感交流
 
-这是一个基于 Streamlit 框架的 Web 应用，集成了实时摄像头人脸分析，语音聊天和数据存储功能。
+这是一个基于 [Streamlit](https://github.com/streamlit/streamlit) 框架的 Web 应用，集成了实时摄像头人脸分析，语音聊天和数据存储功能。
 
 ## 功能  
 
