@@ -4,8 +4,8 @@
 
 ## 功能  
 
-- **人脸分析**：使用 [`serengil/deepface`](https://github.com/serengil/deepface)实时对摄像头中的图像进行人脸分析，包括年龄、性别、种族和情绪检测等。
-- **语音输入**：用户可以通过录音进行语音输入，使用 [`mozilla/DeepSpeech`](https://github.com/mozilla/DeepSpeech)将语音转换为文本。
+- **人脸分析**：使用 [`deepface`](https://github.com/serengil/deepface)实时对摄像头中的图像进行人脸分析，包括年龄、性别、种族和情绪检测等。
+- **语音输入**：用户可以通过录音进行语音输入，使用 [`speech_recognition`](https://github.com/Uberi/speech_recognition)将语音转换为文本。
 
 - **聊天功能**：使用 Ollama API, 将语音输入的文本以及检测到的情绪输入给大语言模型，并生成聊天回复。
 - **文本转语音**：使用 ChatTTS根据大语言模型回复生成语音，并自动播放。
